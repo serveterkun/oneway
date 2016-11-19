@@ -5,7 +5,6 @@
 import sys,time,re
 from socket import *
 from datetime import datetime
-import sys, traceback
 
 
 BUFSIZE = 50
@@ -13,7 +12,6 @@ log = ''; d = ''; say =int(0)
 logfile = open(str(time.time())+'_oneway_received_data.txt', 'a')
 
 
-ECHO_PORT = 50000 + 7
 BUFSIZE = 1024
 
 
