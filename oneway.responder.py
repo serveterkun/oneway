@@ -14,7 +14,7 @@ import sys, traceback
 
 
 log = ''; d = ''; say =int(0)
-logfile = open(str(time.time())+'_oneway_received_data.txt', 'a')
+
 
 
 BUFSIZE = 9000
@@ -84,4 +84,5 @@ def main():
     sys.exit(0)
 
 if __name__ == "__main__":
+    logfile = open(str(datetime.now().strftime("%H.%M.%S_%f"))+'_oneway_client_data.txt', 'a')
     main()                                            
