@@ -12,14 +12,13 @@ from datetime import datetime
 import sys, traceback
 from multiprocessing import Process, Manager
 from time import sleep
-
 global d, s, toplamdelay, mess, delay, ortalamdelay, maxdelay, mindelay
 global g, sq, say, ilkunix
 
-logfile = open(str(time.time())+'_oneway_client_data.txt', 'a')
 
 size=100
 interval=1
+ilkunix=0
 #####SYS.ARGV SET########################
 argsayisi=len(sys.argv)
 print argsayisi ; a=1
@@ -60,6 +59,11 @@ def client():
  try:
     host = destinationip
     port = 4003
+    global ilkunix, logfile
+    global ortalamadelay, maxdelay, mindelay, delay
+
+    logfile = open(str(datetime.now().strftime("%H.%M.%S_%f"))+'_oneway_client_data.txt', 'a')
+   
     sq = 0; g = ''; say= 0
     addr = host, port
     s = socket(AF_INET, SOCK_DGRAM)
@@ -73,7 +77,7 @@ def client():
         header = "seq="+str(sq).zfill(7)+" ; "+str("%.3f" % float(time.time()))+" ; SRC_TIME: "+str("%.9s" % datetime.now().strftime("%H:%M.%f"))+" ; "+"APP_HEAD_END"
         print header+" SEND DATA WITH: "+str(ip_payload_size)+" BYTE IP PAYLOAD"
         senddata=header+payload
-        logfile.write(header)
+        logfile.write(header+"\n")
         s.sendto(senddata, addr)
         if say == 0:
                 ilkunix=time.time()
@@ -84,16 +88,17 @@ def client():
                 print "\n"
                 print "\nUDP Client Factory Istatislikleri"
 
-                logfile.write("\n"+str(time.time()-ilkunix)+" sn. surede : "+str(say)+" adet ONEWAY paket yollandi. \n"); logfile.close()
+                logfile.write("\n"+str(time.time()-ilkunix)+" sn. surede : "+str(say)+" adet ONEWAY paket yollandi. \n")
  finally:
                 print "\n"+str(time.time()-ilkunix)+" sn. surede : "+str(say)+" adet ONEWAY paket yollandi. \n"
+
 
 
 def server():
  try:
 
-
-        d = ''
+        global ortalamadelay, maxdelay, mindelay, delay, s, deneme
+        d = '';deneme="ddddddd"
         s=0; toplamdelay = float(0); ortalamadelay = float(0); maxdelay = float(0); mindelay = float(0)
         prt = 4002
         ss = socket(AF_INET, SOCK_DGRAM)
@@ -124,7 +129,7 @@ def server():
                 log = ''; d = ''; data = ''
 
  except KeyboardInterrupt:
-                logfile.write("\nOrtalama Delay:\t" +str(1000*(time.time()-float(mess[1])))+" ms."); logfile.close()
+                logfile.write("\nOrtalama Delay:\t" +str(ortalamadelay)+" ms."); logfile.close()
                 print "\n"
                 print "\nUDP Server Factory Istatislikleri"
 
@@ -135,7 +140,10 @@ def server():
 
 
 
+
 if __name__ == '__main__':
+
+    
     processes = []
 
     manager = Manager()
@@ -144,12 +152,18 @@ if __name__ == '__main__':
     p = Process(target=client)
     p.start()
     processes.append(p)
+    p1 = Process(target=server)
+    p1.start()
+    processes.append(p1)
 
 
     try:
         for process in processes:
             process.join()
     except KeyboardInterrupt:
-                print ""
+                print "main exception"
+                p1.terminate(); p.terminate()
+                #print "\nToplam " +str(s)+ " adet ONEWAY paketi cevabi (REPLY) yakalandi. REPLY paketlerine gore :\nOrtalama Delay: "+str(ortalamadelay)+" ms.  Maximum Delay: "+str(maxdelay)+" ms.  Minimum Delay: "+str(mindelay)+" ms."
     finally:
-                print ""      
+                print "main finally"
+                
